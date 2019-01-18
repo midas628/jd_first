@@ -1,0 +1,136 @@
+
+# -*- coding:utf-8 -*-
+__author__ = 'daming.ge'
+
+import time,os,subprocess
+import urllib.parse,re
+import json,sqlite3,requests
+import hashlib
+
+
+
+
+def gethash1(content):
+    shaa1 = hashlib.sha1()
+    shaa1.update(content.encode('utf-8'))
+    res = shaa1.hexdigest()
+    #print("sha1采用encode转换加密结果:",res)
+    return(res)
+def follow_someone(user_id):
+    follow_someone_url='https://api.mtoilet.com/v2/relation/follow'
+    user_hash=gethash1('{"user_id":'+str(user_id)+'}')
+    total_content_mid=user_hash
+    #print(total_content_start,total_content_mid,total_content_end)
+    total_content=total_content_start+total_content_mid+'\n'+total_content_end
+    #print(total_content)
+    final_hash=gethash1(total_content)
+    #print(final_hash)
+    return(final_hash)
+    
+def request(flow):
+    #try:
+
+    data=flow.request
+    if 'https://api.mtoilet.com/v2/relation/follow'== data.url:
+        print(data.url,data.content,data.headers)
+        data.content=b'{"user_id":62418}'
+        #print((data.headers['x-mt-sign']))
+        rid=data.headers['x-mt-rid']
+        total_content_start='''/v2/relation/follow
+
+x-mt-appid:mtoilet
+x-mt-channel:ringle
+x-mt-devid:742344B46C61
+x-mt-devtype:Redmi Note 3
+x-mt-platform:android
+'''+rid+'''
+x-mt-token:T1g0NwatZMFmtaOJbdemVQDwYLFrwp5iToVg==.8da
+x-mt-version:2.0.27
+x-mt-appid;x-mt-channel;x-mt-devid;x-mt-devtype;x-mt-platform;x-mt-rid;x-mt-token;x-mt-version
+'''
+        total_content_end='c3cfba79efd8f1c0f77473ec4a3818ac'
+        user_hash=gethash1('{"user_id":'+str(62418)+'}')
+        
+        total_content_mid=user_hash
+        #print(total_content_start,total_content_mid,total_content_end)
+        total_content=total_content_start+total_content_mid+'\n'+total_content_end
+        print(total_content)
+        final_hash=gethash1(total_content)
+        print(final_hash)
+        data.headers['x-mt-sign']=final_hash
+        print(data.content,data.headers)
+
+def response(flow):
+    print(flow.response.content)
+        
+
+
+
+
+
+
+import requests
+import hashlib
+
+
+total_content_start='''/v2/relation/follow
+
+x-mt-appid:mtoilet
+x-mt-channel:ringle
+x-mt-devid:742344B46C61
+x-mt-devtype:Redmi Note 3
+x-mt-platform:android
+x-mt-rid:T1g0NwatZMFmtaOJbdemVQDwYLFrwp5iToVg==.8da1547816070891
+x-mt-token:T1g0NwatZMFmtaOJbdemVQDwYLFrwp5iToVg==.8da
+x-mt-version:2.0.27
+x-mt-appid;x-mt-channel;x-mt-devid;x-mt-devtype;x-mt-platform;x-mt-rid;x-mt-token;x-mt-version
+'''
+total_content_end='c3cfba79efd8f1c0f77473ec4a3818ac'   
+
+
+def gethash1(content):
+    shaa1 = hashlib.sha1()
+    shaa1.update(content.encode('utf-8'))
+    res = shaa1.hexdigest()
+    #print("sha1采用encode转换加密结果:",res)
+    return(res)
+
+s=requests.Session()
+
+
+def follow_someone(user_id):
+    follow_someone_url='https://api.mtoilet.com/v2/relation/follow'
+    user_hash=gethash1('{"user_id":'+str(user_id)+'}')
+    total_content_mid=user_hash
+    #print(total_content_start,total_content_mid,total_content_end)
+    total_content=total_content_start+total_content_mid+'\n'+total_content_end
+    print(total_content)
+    final_hash=gethash1(total_content)
+    print(final_hash)
+    header={
+':method':'POST',
+':path':'/v2/relation/follow',
+':authority':'api.mtoilet.com',
+':scheme':'https',
+'x-mt-token':'T1g0NwatZMFmtaOJbdemVQDwYLFrwp5iToVg==.8da',
+'x-mt-appid':'mtoilet',
+'x-mt-devtype':'Redmi Note 3',
+'x-mt-channel':'ringle',
+'x-mt-version':'2.0.27',
+'x-mt-platform':'android',
+'x-mt-devid':'742344B46C61',
+'x-mt-rid':'T1g0NwatZMFmtaOJbdemVQDwYLFrwp5iToVg==.8da1547811731212',
+'x-mt-sign':final_hash,
+'referer':'http://android.mtoilets.com',
+'content-type':'application/json; charset=UTF-8',
+'content-length':'18',
+'accept-encoding':'gzip',
+'user-agent':'okhttp/3.10.0'
+    }
+    print(header)
+    data={"user_id":str(user_id)}
+    follow_result=s.post(follow_someone_url,headers=header,data=data)
+    print(follow_result.text)
+
+
+follow_someone(296562)
