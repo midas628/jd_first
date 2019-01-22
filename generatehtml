@@ -1,0 +1,144 @@
+# -*- coding:utf-8 -*-
+__author__ = 'daming.ge'
+
+import time,os,subprocess,datetime
+import urllib.parse,re
+import json,sqlite3,requests
+import hashlib
+import sys
+non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
+def get_now():
+    return(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+def gethash1(content):
+    shaa1 = hashlib.sha1()
+    shaa1.update(content.encode('utf-8'))
+    res = shaa1.hexdigest()
+    # print(res)
+    return (res)
+
+
+
+#d = u2.connect("d57f6a3a")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def generate_group_user_hash_string(group_id,nowtime_13,x_mt_token):
+    ret = '''/v2/msg/group/info
+group_id=''' + group_id + '''
+x-mt-appid:mtoilet
+x-mt-channel:ringle
+x-mt-devid:742344B46C61
+x-mt-devtype:Redmi Note 3
+x-mt-platform:android
+x-mt-rid:'''+x_mt_token+str(nowtime_13) + '''
+x-mt-token:'''+x_mt_token+'''
+x-mt-version:2.0.27
+x-mt-appid;x-mt-channel;x-mt-devid;x-mt-devtype;x-mt-platform;x-mt-rid;x-mt-token;x-mt-version
+da39a3ee5e6b4b0d3255bfef95601890afd80709
+c3cfba79efd8f1c0f77473ec4a3818ac'''
+
+    return (gethash1(ret))
+def generate_group_user_header(group_id,nowtime_13,x_mt_token):  # hash 根据group id得到user list header
+    header = {':authority': 'api.mtoilet.com',
+              'x-mt-token': x_mt_token,
+              'x-mt-appid': 'mtoilet',
+              'x-mt-devtype': 'Redmi Note 3',
+              'x-mt-channel': 'ringle',
+              'x-mt-version': '2.0.27',
+              'x-mt-platform': 'android',
+              'x-mt-devid': '742344B46C61',
+              'x-mt-rid': x_mt_token+str(nowtime_13),
+              'x-mt-sign': generate_group_user_hash_string(group_id,nowtime_13,x_mt_token),
+              'referer': 'http://android.mtoilets.com',
+              'accept-encoding': 'gzip',
+              'user-agent': 'okhttp/3.10.0'
+              }
+    return (header)
+def get_user_of_group(group_id,x_mt_token):
+    nowtime_13 = int(round(time.time() * 1000))
+    url = 'https://api.mtoilet.com/v2/msg/group/info?group_id=' + group_id
+    s = requests.Session()
+    aaa = s.get(url, headers=generate_group_user_header(group_id,nowtime_13,x_mt_token))
+    content = aaa.content.decode().translate(non_bmp_map)
+    bbb = json.loads(content)
+    users = bbb['data']['group_info']['users']
+    #print(get_now(),group_id, '发现了%d个用户'%(len(users)))
+    return (users)
+
+
+
+def generate_html(monitor_user,name,filename):
+
+    print('------------------------------------------------------------------------------------------------')
+    x_mt_token = 'T1g0NwatZMFmtaOJbeLDIGXTwMabENI0u3Ew==.d7b'
+    s=requests.Session()
+    a=s.get('http://140.143.243.178/information.txt')
+    b=json.loads(a.content,encoding='utf-8')
+    #print(b)
+    time.sleep(1)
+    str1=''
+    for key in list(b.keys()):  # 由 result 变为 result.keys()
+        user_list=get_user_of_group(key,x_mt_token)
+        #print(user_list)
+        #if 511739 not in user_list:
+
+
+        hhhh = '''<head>
+        <meta http-equiv="X-UA-Compatible" content="edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="renderer" content="webkit">
+        <!--[if lt IE 7]>
+        <meta http-equiv="refresh" content="0; url=http://miwifi.com/cgi-bin/luci/web/ieblock" />
+        <![endif]-->
+        <!--[if gte IE 9]>
+        <style>
+        body {
+           filter: none;
+        }
+        </style>
+        <![endif]-->
+            <title>''' + str(monitor_user) + '—' + name + '的马桶号待领红包' + '''</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+            <link href="/xiaoqiang/web/css/bc.css?v=0.0.3" rel="stylesheet">
+            <link href="/xiaoqiang/web/css/login.css?v=0.0.3" rel="stylesheet">
+            <link href="/xiaoqiang/web/css/guide.css?v=0.0.3" rel="stylesheet">
+    
+        </head>
+        '''
+
+        if monitor_user not in user_list:
+            print(get_now(), name,'红包ID为%s' % key, '红包金额 %d 元' % (b[key][3] / 100), '当前人数 %d 个' % (b[key][2]),'剩余时间 %d 秒' % (b[key][1] - int(time.time())))
+            str1 += (get_now() +' '+name+ '  红包ID为' + key + ',红包金额' + str(b[key][3] / 100.00) + '元,当前人数' + str(b[key][2]) + ',剩余时间' + str(b[key][1] - int(time.time()))) + '<br><br>'
+            with open(filename, mode='w', encoding='utf-8') as f10:
+                f10.write(hhhh + str1)
+        else:
+            #print(get_now(), '红包ID为%s' % key,'已领，跳过')
+            pass
+
+
+
+
+
+
+while(1):
+    print('------------------------------------------------------------------------------------')
+    generate_html(511739,'盖大明','gdm.html')
+    generate_html(571551, '盖大明第2', 'gdm2.html')
+    time.sleep(5)
